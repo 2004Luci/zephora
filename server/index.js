@@ -2,8 +2,14 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import fetch from 'node-fetch';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 
-dotenv.config();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Load .env from server directory
+dotenv.config({ path: join(__dirname, '.env') });
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -13,10 +19,12 @@ app.use(cors());
 app.use(express.json());
 
 // Get API key from environment (server-side only)
-const OPENWEATHER_API_KEY = process.env.OPENWEATHER_API_KEY;
+// Check both OPENWEATHER_API_KEY and VITE_OPENWEATHER_API_KEY for compatibility
+const OPENWEATHER_API_KEY = process.env.OPENWEATHER_API_KEY || process.env.VITE_OPENWEATHER_API_KEY;
 
 if (!OPENWEATHER_API_KEY) {
   console.error('ERROR: OPENWEATHER_API_KEY is not set in environment variables');
+  console.error('Please add OPENWEATHER_API_KEY=your_api_key to server/.env file');
   process.exit(1);
 }
 
