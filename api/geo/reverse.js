@@ -12,10 +12,15 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'lat and lon are required' });
   }
 
-  const OPENWEATHER_API_KEY = process.env.OPENWEATHER_API_KEY;
+  // Check for API key (also check VITE_ prefix for compatibility)
+  const OPENWEATHER_API_KEY = process.env.OPENWEATHER_API_KEY || process.env.VITE_OPENWEATHER_API_KEY;
 
   if (!OPENWEATHER_API_KEY) {
-    return res.status(500).json({ error: 'Server configuration error' });
+    console.error('ERROR: OPENWEATHER_API_KEY is not set in Vercel environment variables');
+    return res.status(500).json({ 
+      error: 'Server configuration error',
+      message: 'OPENWEATHER_API_KEY environment variable is not set. Please add it in Vercel Dashboard → Settings → Environment Variables'
+    });
   }
 
   try {
