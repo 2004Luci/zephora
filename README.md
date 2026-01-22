@@ -1,54 +1,141 @@
-# React + TypeScript + Vite
+# Zephora - Weather App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern weather application built with React, TypeScript, and Vite. Features a secure backend proxy to protect API keys.
 
-Currently, two official plugins are available:
+## 🚀 Quick Start
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### Prerequisites
+- Node.js (v18 or higher)
+- npm or yarn
+- OpenWeatherMap API key ([Get one here](https://openweathermap.org/api))
 
-## Expanding the ESLint configuration
+### Setup
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+1. **Install dependencies:**
+   ```bash
+   npm install
+   ```
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+2. **Set up the backend server:**
+   ```bash
+   # Create server .env file
+   cd server
+   echo "OPENWEATHER_API_KEY=your_api_key_here" > .env
+   echo "PORT=3001" >> .env
+   cd ..
+   ```
+
+3. **Run the application:**
+   ```bash
+   # Run both frontend and backend together
+   npm run dev:all
+   
+   # Or run separately:
+   # Terminal 1: Backend server
+   npm run dev:server
+   
+   # Terminal 2: Frontend
+   npm run dev
+   ```
+
+4. **Open your browser:**
+   - Frontend: http://localhost:5173
+   - Backend API: http://localhost:3001
+
+## 🔒 Security
+
+The API key is **never exposed** to the client:
+- ✅ Stored server-side only in `server/.env`
+- ✅ All API calls go through the backend proxy
+- ✅ No API key visible in browser network tab
+- ✅ `.env` files are gitignored
+
+## 📁 Project Structure
+
+```
+zephora/
+├── api/              # Vercel serverless functions (production)
+│   ├── weather.js
+│   ├── forecast.js
+│   └── geo/
+├── server/           # Express backend proxy (local development only)
+│   ├── index.js      # Server entry point
+│   └── .env          # Server environment variables (not in git)
+├── src/              # React frontend
+│   ├── api/          # API client (calls backend, not OpenWeatherMap directly)
+│   ├── components/   # React components
+│   └── ...
+└── ...
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 📝 Available Scripts
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- `npm run dev` - Start frontend dev server
+- `npm run dev:server` - Start backend server
+- `npm run dev:all` - Start both frontend and backend
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm run lint` - Run ESLint
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+## 🔧 Configuration
+
+### Frontend
+The frontend automatically uses:
+- **Development**: `http://localhost:3001/api` (Express server)
+- **Production (Vercel)**: `/api` (relative paths, same domain)
+
+No configuration needed - it auto-detects the environment!
+
+### Backend
+
+**For Local Development:**
+Configure the server in `server/.env`:
 ```
+OPENWEATHER_API_KEY=your_api_key_here
+PORT=3001
+```
+
+**For Vercel Deployment:**
+Add environment variable in Vercel Dashboard:
+1. Go to your project in Vercel Dashboard
+2. Navigate to **Settings** → **Environment Variables**
+3. Add: `OPENWEATHER_API_KEY` = `your_api_key_here`
+4. Apply to: **Production**, **Preview**, and **Development**
+5. Redeploy your application
+
+## 📚 API Endpoints
+
+The backend exposes these endpoints:
+
+- `GET /api/weather?lat={lat}&lon={lon}` - Current weather
+- `GET /api/forecast?lat={lat}&lon={lon}` - Weather forecast
+- `GET /api/geo/reverse?lat={lat}&lon={lon}` - Reverse geocoding
+- `GET /api/geo/direct?q={query}` - Location search
+
+## 🚀 Vercel Deployment
+
+### First Time Setup
+
+1. **Push your code to GitHub** (if not already done)
+
+2. **In Vercel Dashboard:**
+   - Go to your project → **Settings** → **Environment Variables**
+   - Click **Add New**
+   - Name: `OPENWEATHER_API_KEY`
+   - Value: Your OpenWeatherMap API key
+   - Select: **Production**, **Preview**, and **Development**
+   - Click **Save**
+
+3. **Redeploy:**
+   - Go to **Deployments** tab
+   - Click the **⋯** menu on your latest deployment
+   - Click **Redeploy**
+
+### After Code Changes
+
+When you push to your main branch, Vercel will automatically:
+- Build your frontend
+- Deploy your serverless functions
+- Use the `OPENWEATHER_API_KEY` environment variable you set
+
+**No additional configuration needed!** The API routes in `/api` folder will automatically be deployed as serverless functions.
